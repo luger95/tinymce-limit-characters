@@ -1,0 +1,58 @@
+<div>
+	<label for="myTinyMce">My text : </label>
+    <textarea rows="7" class="myTinyMce" name="myTinyMce" id="myTinyMce"></textarea>
+    <p>Remaining Characters : <span id="characters-count-textarea-1">100</span></p>
+</div>
+
+
+<script>
+    var max_chars    = 100; //max characters
+    var allowed_keys = [8, 13, 16, 17, 18, 20, 33, 34, 35,36, 37, 38, 39, 40, 46];
+    var chars_without_html = 0;
+
+    function alarmChars(){
+        if(chars_without_html > max_chars){
+            $('#characters-count-textarea-1').css('color','red');
+        }else{
+            $('#characters-count-textarea-1').css('color','gray');
+        }
+    }
+
+    $(function(){
+        tinymce.init({
+            selector: "#myTinyMce",
+            plugins: [
+                "autolink lists link",
+                "searchreplace visualblocks code fullscreen nonbreaking",
+                "insertdatetime paste"
+            ],
+            image_advtab: true,
+            toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link",
+            setup: function(ed) {
+                ed.on("KeyDown", function(ed,evt) {
+                  chars_without_html = $.trim(tinyMCE.activeEditor.getContent().replace(/(<([^>]+)>)/ig,"")).length;
+
+                  var key = ed.keyCode;
+
+                  $('#characters-count-textarea-1').html(max_chars - chars_without_html);
+
+                  if(allowed_keys.indexOf(key) != -1){
+                    alarmChars();
+                    return; 
+                  }
+
+                   if (chars_without_html > max_chars-1 && key != 8 && key != 46){
+                    alert('Characters limit!');
+                    ed.stopPropagation();
+                    ed.preventDefault();
+                   }
+                  alarmChars();               
+                });
+            }
+        });
+
+		chars_without_html = $.trim($("#myTinyMce").text().replace(/(<([^>]+)>)/ig,"")).length;
+		$('#characters-count-textarea-1').html(max_chars - chars_without_html);
+		alarmChars();
+    });
+</script>
